@@ -19,6 +19,12 @@ const getSongs = async (_, res) => {
 const addSong = async (req, res) => {
   try {
     const { title, artist, album, genre } = req.body;
+    if (!title || !artist || !album || !genre) {
+      return res
+        .status(400)
+        .json({ message: 'Please fill in all fields', success: false });
+    }
+
     const newSong = await Song.create({ title, artist, album, genre });
     if (!newSong) {
       return res
