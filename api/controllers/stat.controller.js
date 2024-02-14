@@ -2,52 +2,50 @@ const Song = require('../models/song.model');
 
 const getStat = async (_, res) => {
   try {
-    const totalSongs = await Song.countDocuments();
-    const totalArtists = await Song.aggregate([
-      { $group: { _id: '$artist' } },
-      { $group: { _id: null, count: { $sum: 1 } } },
-    ])
-      .exec()
-      .then((data) => data[0].count);
-    const totalAlbums = await Song.aggregate([
-      { $group: { _id: '$album' } },
-      { $group: { _id: null, count: { $sum: 1 } } },
-    ])
-      .exec()
-      .then((data) => data[0].count);
-    const totalGenres = await Song.aggregate([
-      { $group: { _id: '$genre' } },
-      { $group: { _id: null, count: { $sum: 1 } } },
-    ])
-      .exec()
-      .then((data) => data[0].count);
+    const totalSongs = await Song.find().countDocuments();
+    const totalArtists = await Song.find().distinct('artist').countDocuments();
+    const totalAlbums = await Song.find().distinct('album').countDocuments();
+    const totalGenres = await Song.find().distinct('genre').countDocuments();
 
+    // Get genre counts
     const genreCounts = await Song.aggregate([
       { $group: { _id: '$genre', count: { $sum: 1 } } },
     ]);
 
+    // Get songs and albums for each artist
     const artistAlbumCounts = await Song.aggregate([
       {
         $group: {
           _id: '$artist',
-          totalAlbums: { $sum: 1 },
           totalSongs: { $sum: 1 },
+          totalAlbums: { $addToSet: '$album' },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          artist: '$_id',
+          totalSongs: 1,
+          totalAlbums: { $size: '$totalAlbums' },
         },
       },
     ]);
 
+    // Get song stats for each album
     const songStats = await Song.aggregate([
       { $group: { _id: '$album', totalSongs: { $sum: 1 } } },
     ]);
 
     res.json({
-      totalSongs,
-      totalArtists,
-      totalAlbums,
-      totalGenres,
-      genreCounts,
-      artistAlbumCounts,
-      songStats,
+      stats: {
+        totalSongs,
+        totalArtists,
+        totalAlbums,
+        totalGenres,
+        genreCounts,
+        artistAlbumCounts,
+        songStats,
+      },
       success: true,
     });
   } catch (error) {
