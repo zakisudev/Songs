@@ -1,0 +1,33 @@
+{
+  "name": "songs-api",
+  "version": "1.0.0",
+  "description": "Manage information for songs",
+  "main": "server.js",
+  "scripts": {
+    "test": "npm test",
+    "start": "node server.js",
+    "server": "nodemon server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zakisudev/Songs.git"
+  },
+  "keywords": [
+    "Songs"
+  ],
+  "author": "zakisu",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/zakisudev/Songs/issues"
+  },
+  "homepage": "https://github.com/zakisudev/Songs#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.4",
+    "express": "^4.18.2",
+    "mongoose": "^8.1.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.3"
+  }
+}
