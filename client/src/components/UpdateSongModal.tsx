@@ -5,7 +5,7 @@ import { updateSong as UPDATE } from '../app/song.slice';
 import { toast } from 'react-toastify';
 import styled from '@emotion/styled';
 import { IoMdClose } from 'react-icons/io';
-
+import loading from '../assets/Gear-0.6s-200px.svg';
 interface UpdateSongProps {
   song: {
     _id: string;
@@ -89,6 +89,10 @@ const Input = styled.input`
   font-family: inherit;
 `;
 const StyledButton = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5em;
   width: 100%;
   padding: 0.5em;
   border-radius: 8px;
@@ -102,6 +106,14 @@ const StyledButton = styled.button`
   &:hover {
     background-color: #2a2a2a;
   }
+`;
+const LoadingAnimation = styled.img`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 25px;
+  height: 25px;
+  background-color: transparent;
 `;
 
 const UpdateSongModal: React.FC<UpdateSongProps> = ({ onClose, song }) => {
@@ -117,9 +129,9 @@ const UpdateSongModal: React.FC<UpdateSongProps> = ({ onClose, song }) => {
 
   const handleUpdateSong = async () => {
     if (
-      !updatedSong.title ||
-      !updatedSong.artist ||
-      !updatedSong.album ||
+      !updatedSong.title &&
+      !updatedSong.artist &&
+      !updatedSong.album &&
       !updatedSong.genre
     ) {
       setError('Please change at least one field to update song');
@@ -198,6 +210,7 @@ const UpdateSongModal: React.FC<UpdateSongProps> = ({ onClose, song }) => {
 
           <StyledButton onClick={handleUpdateSong} disabled={updateLoading}>
             Update Song
+            {updateLoading && <LoadingAnimation src={loading} alt="loading" />}
           </StyledButton>
         </ModalBody>
       </ModalContent>

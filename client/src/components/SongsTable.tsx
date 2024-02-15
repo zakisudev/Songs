@@ -9,6 +9,7 @@ import Modal from 'react-modal';
 import AddSongModal from './AddSongModal';
 import UpdateSongModal from './UpdateSongModal';
 import { toast } from 'react-toastify';
+import loading from '../assets/Magnify-1s-200px.svg';
 
 export interface Song {
   _id: string;
@@ -19,9 +20,9 @@ export interface Song {
 }
 
 const SongHeader = styled.h1`
-  text-align: center;
+  text-align: left;
   font-size: 2em;
-  margin: 0;
+  margin: 0 0 0 1em;
   width: 100%;
   text-transform: uppercase;
   font-weight: 500;
@@ -169,6 +170,14 @@ const StyledButtonCancel = styled.button`
     background-color: darkred;
   }
 `;
+const Loading = styled.img`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: transparent;
+  width: 10%;
+  height: 100%;
+`;
 
 const SongsTable = () => {
   Modal.setAppElement('#root');
@@ -181,6 +190,7 @@ const SongsTable = () => {
   const [deleteError, setDeleteError] = useState('');
 
   const { songs } = useSelector((state: RootState) => state.songs);
+  const { stats } = useSelector((state: RootState) => state.stats);
   const dispatch = useDispatch();
 
   const handleSongSelect = (song: Song) => () => {
@@ -223,6 +233,10 @@ const SongsTable = () => {
     };
     fetchSongsFromBackend();
   }, [dispatch]);
+
+  if (songs.length === 0 || !stats) {
+    return <Loading src={loading} alt="loading" />;
+  }
 
   return (
     <SongsTableContainer>

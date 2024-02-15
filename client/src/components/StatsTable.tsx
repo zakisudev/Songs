@@ -7,6 +7,7 @@ import StatByGenre from './StatByGenre';
 import StatByArtist from './StatByArtist';
 import StatByAlbum from './StatByAlbum';
 import styled from '@emotion/styled';
+import loading from '../assets/Magnify-1s-200px.svg';
 
 const StatHeader = styled.h1`
   text-align: center;
@@ -64,10 +65,19 @@ const DetailsDiv = styled.div`
   font-weight: 500;
   text-transform: uppercase;
 `;
+const Loading = styled.img`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: transparent;
+  width: 10%;
+  height: 100%;
+`;
 
 const StatsTable = () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { stats }: any = useSelector((state: RootState) => state.stats);
+  const { songs } = useSelector((state: RootState) => state.songs);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -85,6 +95,10 @@ const StatsTable = () => {
     };
     fetchStatsFromBackend();
   }, [dispatch]);
+
+  if (songs.length === 0 || !stats.totalSongs) {
+    return <Loading src={loading} alt="loading" />;
+  }
 
   return (
     <StatContainer>

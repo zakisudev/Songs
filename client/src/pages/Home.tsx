@@ -8,9 +8,9 @@ const MainContainer = styled.main`
   display: grid;
   grid-template-columns: 2fr 1fr;
   width: 95vw;
-  height: 85vh;
+  height: 87vh;
   padding: 0;
-  padding-top: 1em;
+  padding-top: 0.5em;
   background-color: lightgray;
   border-radius: 5px;
   color: black;

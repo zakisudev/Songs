@@ -6,11 +6,13 @@ import {
 } from 'react-router-dom';
 import './App.css';
 import Home from './pages/Home';
+import NotFound from './pages/NotFound';
 
 const router = createBrowserRouter(
   createRoutesFromElements(
-    <Route path="/" element={<Home />}>
-      <Route path="*" element={<div>Not Found</div>} />
+    <Route path="">
+      <Route path="/" element={<Home />} />
+      <Route path="*" element={<NotFound />} />
     </Route>
   )
 );
