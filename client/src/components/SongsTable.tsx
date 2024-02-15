@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
-import { fetchSongs } from './../services/api';
-import { setSongs } from '../app/song.slice';
+import { fetchSongs, deleteSong } from './../services/api';
+import { setSongs, deleteSong as DELETE } from '../app/song.slice';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../app/root.reducer';
 import { TbMusicPlus, TbEdit, TbHttpDelete } from 'react-icons/tb';
 import styled from '@emotion/styled';
+import Modal from 'react-modal';
 import AddSongModal from './AddSongModal';
 import UpdateSongModal from './UpdateSongModal';
+import { toast } from 'react-toastify';
 
 export interface Song {
   _id: string;
@@ -98,11 +100,85 @@ const Td = styled.td`
     }
   }
 `;
+const StyledModal = styled(Modal)`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1em;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+  overflow: auto;
+  padding: 1em;
+  box-sizing: border-box;
+  transition: opacity 0.25s;
+  opacity: 1;
+`;
+const DeleteContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+  align-items: center;
+  justify-content: center;
+  width: 30%;
+  padding: 1em;
+  background-color: white;
+  border-radius: 8px;
+  h1 {
+    font-size: 1.2em;
+    margin: 0;
+    color: #1a1a1a;
+    padding: 0;
+  }
+  p {
+    font-size: 1em;
+    margin: 0;
+    padding: 0;
+    color: red;
+  }
+`;
+const ButtonsContainer = styled.div`
+  display: flex;
+  gap: 2em;
+`;
+const StyledButton = styled.button`
+  padding: 0.5em 1em;
+  border: none;
+  border-radius: 8px;
+  background-color: #1a1a1a;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.25s;
+  &:hover {
+    background-color: gray;
+  }
+`;
+const StyledButtonCancel = styled.button`
+  padding: 0.5em 1em;
+  border: none;
+  border-radius: 8px;
+  background-color: red;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.25s;
+  &:hover {
+    background-color: darkred;
+  }
+`;
 
 const SongsTable = () => {
+  Modal.setAppElement('#root');
   const [addModal, setAddModal] = useState(false);
   const [updateModal, setUpdateModal] = useState(false);
   const [editingSong, setEditingSong] = useState({});
+  const [deletingSong, setDeletingSong] = useState({} as Song);
+  const [modalIsOpen, setModalIsOpen] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [deleteError, setDeleteError] = useState('');
 
   const { songs } = useSelector((state: RootState) => state.songs);
   const dispatch = useDispatch();
@@ -110,6 +186,30 @@ const SongsTable = () => {
   const handleSongSelect = (song: Song) => () => {
     setUpdateModal(true);
     setEditingSong(song);
+  };
+
+  const handleDeleteModal = (song: Song) => () => {
+    setModalIsOpen(true);
+    setDeletingSong(song);
+  };
+
+  const handleSongDelete = async () => {
+    setDeleteLoading(true);
+    setDeleteError('');
+    try {
+      const res = await deleteSong(deletingSong._id);
+      if (res?.success) {
+        dispatch(DELETE(deletingSong._id));
+        toast.success('Song deleted successfully');
+      } else {
+        setDeleteError('Error deleting song, try again');
+      }
+    } catch (error) {
+      setDeleteError('Server error, try again later');
+    } finally {
+      setDeleteLoading(false);
+      setModalIsOpen(false);
+    }
   };
 
   useEffect(() => {
@@ -126,6 +226,32 @@ const SongsTable = () => {
 
   return (
     <SongsTableContainer>
+      {modalIsOpen && (
+        <StyledModal
+          isOpen={modalIsOpen}
+          onRequestClose={() => setModalIsOpen(false)}
+          contentLabel="Delete Confirmation Modal"
+        >
+          <DeleteContainer>
+            <h1>Song will be deleted, are you sure?</h1>
+
+            {deleteError && <p>{deleteError}</p>}
+
+            <ButtonsContainer>
+              <StyledButton type="button" onClick={handleSongDelete}>
+                {deleteLoading ? 'Deleting...' : 'Delete'}
+              </StyledButton>
+              <StyledButtonCancel
+                type="button"
+                onClick={() => setModalIsOpen(false)}
+              >
+                Cancel
+              </StyledButtonCancel>
+            </ButtonsContainer>
+          </DeleteContainer>
+        </StyledModal>
+      )}
+
       {addModal && <AddSongModal onClose={() => setAddModal(false)} />}
 
       {updateModal && (
@@ -162,7 +288,7 @@ const SongsTable = () => {
                 <button onClick={handleSongSelect(song)}>
                   <TbEdit />
                 </button>
-                <button>
+                <button onClick={handleDeleteModal(song)}>
                   <TbHttpDelete />
                 </button>
               </Td>
