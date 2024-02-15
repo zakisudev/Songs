@@ -1,19 +1,45 @@
-import { call, put, takeLatest } from 'redux-saga/effects';
-import { setSongs } from '../song.slice';
-import { fetchSongs } from '../../services/api';
+import { takeEvery, call, put } from 'redux-saga/effects';
+import { addSong, deleteSong, updateSong } from '../song.slice';
+import { fetchStats as FETCH } from '../../services/api';
+import { setStats } from '../stat.slice';
 
-function* handleFetchSongs(): Generator {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function* handleAddSong(action: any): any {
   try {
-    const songs = yield call(fetchSongs);
-    yield put(setSongs(songs));
+    yield call(addSong, action.payload);
+    const stats = yield call(FETCH);
+    yield put(setStats(stats?.stats));
   } catch (error) {
-    console.log(error);
-    yield put(setSongs([]));
+    console.error(error);
+  }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function* handleUpdateSong(action: any): any {
+  try {
+    yield call(updateSong, action.payload);
+    const stats = yield call(FETCH);
+    yield put(setStats(stats?.stats));
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function* handleDeleteSong(action: any): any {
+  try {
+    yield call(deleteSong, action.payload);
+    const stats = yield call(FETCH);
+    yield put(setStats(stats?.stats));
+  } catch (error) {
+    console.error(error);
   }
 }
 
 function* songSaga() {
-  yield takeLatest('songs/fetchSongs', handleFetchSongs);
+  yield takeEvery(addSong.type, handleAddSong);
+  yield takeEvery(updateSong.type, handleUpdateSong);
+  yield takeEvery(deleteSong.type, handleDeleteSong);
 }
 
 export default songSaga;
