@@ -4,7 +4,6 @@
   "description": "Manage information for songs",
   "main": "server.js",
   "scripts": {
-    "test": "npm test",
     "start": "node server.js",
     "server": "nodemon server.js"
   },
