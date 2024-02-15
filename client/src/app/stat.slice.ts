@@ -1,14 +1,14 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
-  stats: Object,
+  stats: {},
 };
 
 const statsSlice = createSlice({
   name: 'stats',
   initialState,
   reducers: {
-    setStats: (state, action) => {
+    setStats: (state = initialState, action) => {
       state.stats = action.payload;
     },
   },

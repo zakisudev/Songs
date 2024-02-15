@@ -21,7 +21,7 @@ const songsSlice = createSlice({
   name: 'songs',
   initialState,
   reducers: {
-    setSongs: (state, action) => {
+    setSongs: (state = initialState, action) => {
       state.songs = action.payload;
     },
     addSong: (state, action) => {
