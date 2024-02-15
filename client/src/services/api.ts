@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const baseUrl = 'http://localhost:5000/api';
+const baseUrl = '/api';
 
 // @desc    Fetch all songs
 // @route   GET /api/songs
