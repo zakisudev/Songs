@@ -6,7 +6,7 @@ const mongoose = require('mongoose');
 // @access  Public
 const getSongs = async (_, res) => {
   try {
-    const songs = await Song.find();
+    const songs = await Song.find().sort({ updatedAt: -1 }).exec();
     res.status(200).json({ songs, success: true });
   } catch (error) {
     res.status(500).send({ message: error.message, success: false });
@@ -42,20 +42,32 @@ const addSong = async (req, res) => {
 // @route   PUT /api/songs/:id
 // @access  Public
 const updateSong = async (req, res) => {
+  const { title, artist, album, genre } = req.body;
   const songId = req.params.id;
   if (!mongoose.Types.ObjectId.isValid(songId)) {
     return res.status(404).json({ message: 'Invalid song id', success: false });
   }
 
   try {
-    const { title, artist, album, genre } = req.body;
-    const updatedSong = await Song.findByIdAndUpdate({
-      _id: songId,
-      title,
-      artist,
-      album,
-      genre,
-    });
+    const songToBeUpdated = await Song.findById(songId);
+    if (!songToBeUpdated) {
+      return res
+        .status(404)
+        .json({ message: 'Song not found', success: false });
+    }
+
+    if (!title || !artist || !album || !genre) {
+      return res
+        .status(400)
+        .json({ message: 'Please fill at least one field', success: false });
+    }
+    if (title) songToBeUpdated.title = title || songToBeUpdated.title;
+    if (artist) songToBeUpdated.artist = artist || songToBeUpdated.artist;
+    if (album) songToBeUpdated.album = album || songToBeUpdated.album;
+    if (genre) songToBeUpdated.genre = genre || songToBeUpdated.genre;
+
+    const updatedSong = await songToBeUpdated.save();
+
     if (!updatedSong) {
       return res
         .status(400)
