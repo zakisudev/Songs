@@ -29,7 +29,7 @@ const songsSlice = createSlice({
     },
     updateSong: (state, action) => {
       state.songs = state.songs.map((song) =>
-        song._id === action.payload.id ? action.payload : song
+        song._id === action.payload._id ? action.payload : song
       );
     },
     deleteSong: (state, action) => {
