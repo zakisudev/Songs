@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const baseUrl = '/api';
+const baseUrl = 'https://songs-yffn.onrender.com/api';
 
 // @desc    Fetch all songs
 // @route   GET /api/songs
