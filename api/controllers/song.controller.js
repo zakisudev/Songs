@@ -56,7 +56,7 @@ const updateSong = async (req, res) => {
         .json({ message: 'Song not found', success: false });
     }
 
-    if (!title || !artist || !album || !genre) {
+    if (!title && !artist && !album && !genre) {
       return res
         .status(400)
         .json({ message: 'Please fill at least one field', success: false });
