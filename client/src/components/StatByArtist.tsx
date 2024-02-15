@@ -85,7 +85,7 @@ const StatByArtist = ({ artistStat, title }: StatByArtistProps) => {
             Select an artist
           </option>
           {artistStat?.map((ar) => (
-            <option key={ar?._id} value={ar?.artist}>
+            <option key={ar?.artist} value={ar?.artist}>
               {ar?.artist}
             </option>
           ))}
