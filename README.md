@@ -23,23 +23,29 @@ The Songs repository is a collection of songs information that can be used for v
 
 ## Installation
 
-To use the Songs repository, you need to have Git installed on your machine. You can clone the repository using the following command:
+To use the Songs repository, you need to have Git OR Docker installed on your machine.
+
+**_ You can clone the repository using the following command: _**
 
 `git clone https://github.com/zakisudev/Songs`
 
-To Start using the Songs App, you will need to install dependencies first and setup environment variables as listed in the `.env.example` file
+To Start using the Songs App, you will need to install dependencies first and setup environment variables as listed in the `.env.example` file.
 
 ## Usage
 
-### Setup backend
+### Full Usage Setup: backend
 
 `cd api/ && npm install`
 
-### Setup frontend
+### Full Usage Setup: frontend
 
 `cd client/ && npm install`
 
-### Run frontend
+### Start dev server
+
+`npm run server` inside the api folder
+
+### Run frontend app
 
 `npm run dev`
 
@@ -47,9 +53,31 @@ To Start using the Songs App, you will need to install dependencies first and se
 
 `http://localhost:5173`
 
+## You can also pull the docker image for backend or apis only from docker.hub
+
+`docker pull zakihd/songs-api` PS: Image size is 390MB
+
+Make sure port 5000 is available and run `docker run -p 5000:5000 -d zakihd/songs-api`
+
+This command maps the docker container to the port 5000 and now you can open your favorite web browser and go to http://localhost:5000 to access the apis.
+
+**_ List of available GET api requests:_**
+
+`/api/songs` will give you all songs available
+`/api/stats` will give you stats about the songs available
+
+You should stop the container once finished with the following command
+
+Find the image name zakihd/songs-api and grab the container ID with
+`docker ps`
+
+Run the command `docker stop XXXXXXXXXXXX` with the correct container ID for zakihd/songs-api
+
+Check on the browser that the api has stopped working. :)
+
 ## Contribution
 
-You are welcome to contribute to this repository, Please create a pull request with the latest updates you have made
+You are welcome to contribute to this repository, Please create a pull request with the latest updates you have made.
 
 ## License
 
