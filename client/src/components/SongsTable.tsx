@@ -78,7 +78,7 @@ const SongsTable = () => {
     return (
       <>
         <p>Please wait, populating data...</p>
-        <Loading src={loading} alt="loading" />;
+        <Loading src={loading} alt="loading" />
       </>
     );
   }
