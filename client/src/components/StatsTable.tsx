@@ -1,13 +1,91 @@
 import { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import styled from '@emotion/styled';
 import { fetchStats } from './../services/api';
 import { setStats } from '../app/stat.slice';
-import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../app/root.reducer';
 import StatByGenre from './StatByGenre';
 import StatByArtist from './StatByArtist';
 import StatByAlbum from './StatByAlbum';
-import styled from '@emotion/styled';
 import loading from '../assets/Magnify-1s-200px.svg';
+
+const StatsTable = () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { stats }: any = useSelector((state: RootState) => state.stats);
+  const { songs } = useSelector((state: RootState) => state.songs);
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    const fetchStatsFromBackend = async () => {
+      try {
+        const res = await fetchStats();
+        if (res?.success) {
+          dispatch(setStats(res.stats));
+        } else {
+          console.error(res.error);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    fetchStatsFromBackend();
+  }, [dispatch]);
+
+  if (songs.length === 0 || !stats.totalSongs) {
+    return (
+      <>
+        <p>Please wait, populating data...</p>
+        <Loading src={loading} alt="loading" />;
+      </>
+    );
+  }
+
+  return (
+    <StatContainer>
+      <StatHeader>Songs Stats:</StatHeader>
+      <GenStatContainer>
+        <StatsDetailHeader>General stats:</StatsDetailHeader>
+        <GenStatDetails>
+          <DetailsDiv>Total # of Songs</DetailsDiv>
+          <DetailsDiv>{stats?.totalSongs}</DetailsDiv>
+        </GenStatDetails>
+        <GenStatDetails>
+          <DetailsDiv>Total # of Artists</DetailsDiv>
+          <DetailsDiv>{stats?.totalArtists}</DetailsDiv>
+        </GenStatDetails>
+        <GenStatDetails>
+          <DetailsDiv>Total # of Albums</DetailsDiv>
+          <DetailsDiv>{stats?.totalAlbums}</DetailsDiv>
+        </GenStatDetails>
+        <GenStatDetails>
+          <DetailsDiv>Total # of Genres</DetailsDiv>
+          <DetailsDiv>{stats?.totalGenres}</DetailsDiv>
+        </GenStatDetails>
+      </GenStatContainer>
+      <GenStatContainer>
+        <StatsDetailHeader>Stats in detail:</StatsDetailHeader>
+        <GenStatDetails>
+          <DetailsDiv>
+            <StatByGenre genreStat={stats?.genreCounts} title="Genre" />
+          </DetailsDiv>
+        </GenStatDetails>
+        <GenStatDetails>
+          <DetailsDiv>
+            <StatByArtist
+              artistStat={stats?.artistAlbumCounts}
+              title="Artist"
+            />
+          </DetailsDiv>
+        </GenStatDetails>
+        <GenStatDetails>
+          <DetailsDiv>
+            <StatByAlbum albumStat={stats?.songStats} title="Album" />
+          </DetailsDiv>
+        </GenStatDetails>
+      </GenStatContainer>
+    </StatContainer>
+  );
+};
 
 const StatHeader = styled.h1`
   text-align: center;
@@ -73,78 +151,5 @@ const Loading = styled.img`
   width: 10%;
   height: 100%;
 `;
-
-const StatsTable = () => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { stats }: any = useSelector((state: RootState) => state.stats);
-  const { songs } = useSelector((state: RootState) => state.songs);
-  const dispatch = useDispatch();
-
-  useEffect(() => {
-    const fetchStatsFromBackend = async () => {
-      try {
-        const res = await fetchStats();
-        if (res?.success) {
-          dispatch(setStats(res.stats));
-        } else {
-          console.error(res.error);
-        }
-      } catch (error) {
-        console.error(error);
-      }
-    };
-    fetchStatsFromBackend();
-  }, [dispatch]);
-
-  if (songs.length === 0 || !stats.totalSongs) {
-    return <Loading src={loading} alt="loading" />;
-  }
-
-  return (
-    <StatContainer>
-      <StatHeader>Songs Stats:</StatHeader>
-      <GenStatContainer>
-        <StatsDetailHeader>General stats:</StatsDetailHeader>
-        <GenStatDetails>
-          <DetailsDiv>Total # of Songs</DetailsDiv>
-          <DetailsDiv>{stats?.totalSongs}</DetailsDiv>
-        </GenStatDetails>
-        <GenStatDetails>
-          <DetailsDiv>Total # of Artists</DetailsDiv>
-          <DetailsDiv>{stats?.totalArtists}</DetailsDiv>
-        </GenStatDetails>
-        <GenStatDetails>
-          <DetailsDiv>Total # of Albums</DetailsDiv>
-          <DetailsDiv>{stats?.totalAlbums}</DetailsDiv>
-        </GenStatDetails>
-        <GenStatDetails>
-          <DetailsDiv>Total # of Genres</DetailsDiv>
-          <DetailsDiv>{stats?.totalGenres}</DetailsDiv>
-        </GenStatDetails>
-      </GenStatContainer>
-      <GenStatContainer>
-        <StatsDetailHeader>Stats in detail:</StatsDetailHeader>
-        <GenStatDetails>
-          <DetailsDiv>
-            <StatByGenre genreStat={stats?.genreCounts} title="Genre" />
-          </DetailsDiv>
-        </GenStatDetails>
-        <GenStatDetails>
-          <DetailsDiv>
-            <StatByArtist
-              artistStat={stats?.artistAlbumCounts}
-              title="Artist"
-            />
-          </DetailsDiv>
-        </GenStatDetails>
-        <GenStatDetails>
-          <DetailsDiv>
-            <StatByAlbum albumStat={stats?.songStats} title="Album" />
-          </DetailsDiv>
-        </GenStatDetails>
-      </GenStatContainer>
-    </StatContainer>
-  );
-};
 
 export default StatsTable;

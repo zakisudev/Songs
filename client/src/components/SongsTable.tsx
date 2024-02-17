@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import Modal from 'react-modal';
+import styled from '@emotion/styled';
+import { TbMusicPlus, TbEdit, TbHttpDelete } from 'react-icons/tb';
 import { fetchSongs, deleteSong } from './../services/api';
 import { setSongs, deleteSong as DELETE } from '../app/song.slice';
-import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../app/root.reducer';
-import { TbMusicPlus, TbEdit, TbHttpDelete } from 'react-icons/tb';
-import styled from '@emotion/styled';
-import Modal from 'react-modal';
 import AddSongModal from './AddSongModal';
 import UpdateSongModal from './UpdateSongModal';
 import { toast } from 'react-toastify';
@@ -18,6 +18,146 @@ export interface Song {
   album: string;
   genre: string;
 }
+
+const SongsTable = () => {
+  Modal.setAppElement('#root');
+  const [addModal, setAddModal] = useState(false);
+  const [updateModal, setUpdateModal] = useState(false);
+  const [editingSong, setEditingSong] = useState({});
+  const [deletingSong, setDeletingSong] = useState({} as Song);
+  const [modalIsOpen, setModalIsOpen] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [deleteError, setDeleteError] = useState('');
+
+  const { songs } = useSelector((state: RootState) => state.songs);
+  const { stats } = useSelector((state: RootState) => state.stats);
+  const dispatch = useDispatch();
+
+  const handleSongSelect = (song: Song) => () => {
+    setUpdateModal(true);
+    setEditingSong(song);
+  };
+
+  const handleDeleteModal = (song: Song) => () => {
+    setModalIsOpen(true);
+    setDeletingSong(song);
+  };
+
+  const handleSongDelete = async () => {
+    setDeleteLoading(true);
+    setDeleteError('');
+    try {
+      const res = await deleteSong(deletingSong._id);
+      if (res?.success) {
+        dispatch(DELETE(deletingSong._id));
+        toast.success('Song deleted successfully');
+      } else {
+        setDeleteError('Error deleting song, try again');
+      }
+    } catch (error) {
+      setDeleteError('Server error, try again later');
+    } finally {
+      setDeleteLoading(false);
+      setModalIsOpen(false);
+    }
+  };
+
+  useEffect(() => {
+    const fetchSongsFromBackend = async () => {
+      try {
+        const res = await fetchSongs();
+        dispatch(setSongs(res.songs));
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    fetchSongsFromBackend();
+  }, [dispatch]);
+
+  if (songs.length === 0 || !stats) {
+    return (
+      <>
+        <p>Please wait, populating data...</p>
+        <Loading src={loading} alt="loading" />;
+      </>
+    );
+  }
+
+  return (
+    <SongsTableContainer>
+      {modalIsOpen && (
+        <StyledModal
+          isOpen={modalIsOpen}
+          onRequestClose={() => setModalIsOpen(false)}
+          contentLabel="Delete Confirmation Modal"
+        >
+          <DeleteContainer>
+            <h1>Song will be deleted, are you sure?</h1>
+
+            {deleteError && <p>{deleteError}</p>}
+
+            <ButtonsContainer>
+              <StyledButton type="button" onClick={handleSongDelete}>
+                {deleteLoading ? 'Deleting...' : 'Delete'}
+              </StyledButton>
+              <StyledButtonCancel
+                type="button"
+                onClick={() => setModalIsOpen(false)}
+              >
+                Cancel
+              </StyledButtonCancel>
+            </ButtonsContainer>
+          </DeleteContainer>
+        </StyledModal>
+      )}
+
+      {addModal && <AddSongModal onClose={() => setAddModal(false)} />}
+
+      {updateModal && (
+        <UpdateSongModal
+          onClose={() => setUpdateModal(false)}
+          song={editingSong as Song}
+        />
+      )}
+      <SongHeader>Songs:</SongHeader>
+      <ButtonContainer>
+        <AddButton onClick={() => setAddModal(true)}>
+          <TbMusicPlus />
+          Add Song
+        </AddButton>
+      </ButtonContainer>
+      <Table>
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Artist</th>
+            <th>Album</th>
+            <th>Genre</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {songs.map((song) => (
+            <tr key={song._id}>
+              <td>{song.title}</td>
+              <td>{song.artist}</td>
+              <td>{song.album}</td>
+              <td>{song.genre}</td>
+              <Td>
+                <button onClick={handleSongSelect(song)}>
+                  <TbEdit />
+                </button>
+                <button onClick={handleDeleteModal(song)}>
+                  <TbHttpDelete />
+                </button>
+              </Td>
+            </tr>
+          ))}
+        </tbody>
+      </Table>
+    </SongsTableContainer>
+  );
+};
 
 const SongHeader = styled.h1`
   text-align: left;
@@ -178,140 +318,5 @@ const Loading = styled.img`
   width: 10%;
   height: 100%;
 `;
-
-const SongsTable = () => {
-  Modal.setAppElement('#root');
-  const [addModal, setAddModal] = useState(false);
-  const [updateModal, setUpdateModal] = useState(false);
-  const [editingSong, setEditingSong] = useState({});
-  const [deletingSong, setDeletingSong] = useState({} as Song);
-  const [modalIsOpen, setModalIsOpen] = useState(false);
-  const [deleteLoading, setDeleteLoading] = useState(false);
-  const [deleteError, setDeleteError] = useState('');
-
-  const { songs } = useSelector((state: RootState) => state.songs);
-  const { stats } = useSelector((state: RootState) => state.stats);
-  const dispatch = useDispatch();
-
-  const handleSongSelect = (song: Song) => () => {
-    setUpdateModal(true);
-    setEditingSong(song);
-  };
-
-  const handleDeleteModal = (song: Song) => () => {
-    setModalIsOpen(true);
-    setDeletingSong(song);
-  };
-
-  const handleSongDelete = async () => {
-    setDeleteLoading(true);
-    setDeleteError('');
-    try {
-      const res = await deleteSong(deletingSong._id);
-      if (res?.success) {
-        dispatch(DELETE(deletingSong._id));
-        toast.success('Song deleted successfully');
-      } else {
-        setDeleteError('Error deleting song, try again');
-      }
-    } catch (error) {
-      setDeleteError('Server error, try again later');
-    } finally {
-      setDeleteLoading(false);
-      setModalIsOpen(false);
-    }
-  };
-
-  useEffect(() => {
-    const fetchSongsFromBackend = async () => {
-      try {
-        const res = await fetchSongs();
-        dispatch(setSongs(res.songs));
-      } catch (error) {
-        console.error(error);
-      }
-    };
-    fetchSongsFromBackend();
-  }, [dispatch]);
-
-  if (songs.length === 0 || !stats) {
-    return <Loading src={loading} alt="loading" />;
-  }
-
-  return (
-    <SongsTableContainer>
-      {modalIsOpen && (
-        <StyledModal
-          isOpen={modalIsOpen}
-          onRequestClose={() => setModalIsOpen(false)}
-          contentLabel="Delete Confirmation Modal"
-        >
-          <DeleteContainer>
-            <h1>Song will be deleted, are you sure?</h1>
-
-            {deleteError && <p>{deleteError}</p>}
-
-            <ButtonsContainer>
-              <StyledButton type="button" onClick={handleSongDelete}>
-                {deleteLoading ? 'Deleting...' : 'Delete'}
-              </StyledButton>
-              <StyledButtonCancel
-                type="button"
-                onClick={() => setModalIsOpen(false)}
-              >
-                Cancel
-              </StyledButtonCancel>
-            </ButtonsContainer>
-          </DeleteContainer>
-        </StyledModal>
-      )}
-
-      {addModal && <AddSongModal onClose={() => setAddModal(false)} />}
-
-      {updateModal && (
-        <UpdateSongModal
-          onClose={() => setUpdateModal(false)}
-          song={editingSong as Song}
-        />
-      )}
-      <SongHeader>Songs:</SongHeader>
-      <ButtonContainer>
-        <AddButton onClick={() => setAddModal(true)}>
-          <TbMusicPlus />
-          Add Song
-        </AddButton>
-      </ButtonContainer>
-      <Table>
-        <thead>
-          <tr>
-            <th>Title</th>
-            <th>Artist</th>
-            <th>Album</th>
-            <th>Genre</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          {songs.map((song) => (
-            <tr key={song._id}>
-              <td>{song.title}</td>
-              <td>{song.artist}</td>
-              <td>{song.album}</td>
-              <td>{song.genre}</td>
-              <Td>
-                <button onClick={handleSongSelect(song)}>
-                  <TbEdit />
-                </button>
-                <button onClick={handleDeleteModal(song)}>
-                  <TbHttpDelete />
-                </button>
-              </Td>
-            </tr>
-          ))}
-        </tbody>
-      </Table>
-    </SongsTableContainer>
-  );
-};
 
 export default SongsTable;
