@@ -24,16 +24,21 @@ const songsSlice = createSlice({
     setSongs: (state = initialState, action) => {
       state.songs = action.payload;
     },
+
     addSong: (state, action) => {
-      state.songs.unshift(action.payload);
+      state.songs = [action.payload, ...state.songs];
     },
+
     updateSong: (state, action) => {
       state.songs = state.songs.map((song) =>
         song._id === action.payload._id ? action.payload : song
       );
     },
+
     deleteSong: (state, action) => {
-      state.songs = state.songs.filter((song) => song._id !== action.payload);
+      state.songs = state.songs.filter(
+        (song) => song._id !== action.payload._id
+      );
     },
   },
 });
