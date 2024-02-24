@@ -1,8 +1,7 @@
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from '@emotion/styled';
-import { fetchStats } from './../services/api';
-import { setStats } from '../app/stat.slice';
+import { fetchStats } from '../app/actions';
 import { RootState } from '../app/root.reducer';
 import StatByGenre from './StatByGenre';
 import StatByArtist from './StatByArtist';
@@ -10,28 +9,24 @@ import StatByAlbum from './StatByAlbum';
 import loading from '../assets/Magnify-1s-200px.svg';
 
 const StatsTable = () => {
+  const dispatch = useDispatch();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { stats }: any = useSelector((state: RootState) => state.stats);
   const { songs } = useSelector((state: RootState) => state.songs);
-  const dispatch = useDispatch();
 
   useEffect(() => {
     const fetchStatsFromBackend = async () => {
       try {
-        const res = await fetchStats();
-        if (res?.success) {
-          dispatch(setStats(res.stats));
-        } else {
-          console.error(res.error);
-        }
+        dispatch(fetchStats());
       } catch (error) {
         console.error(error);
       }
     };
+
     fetchStatsFromBackend();
   }, [dispatch]);
 
-  if (songs.length === 0 || !stats.totalSongs) {
+  if (songs?.length === 0 || !stats.totalSongs) {
     return (
       <>
         <p>Please wait, populating data...</p>
