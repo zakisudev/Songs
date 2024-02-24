@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { addSong } from '../services/api';
-import { addSong as ADD } from '../app/song.slice';
 import { toast } from 'react-toastify';
 import styled from '@emotion/styled';
 import { IoMdClose } from 'react-icons/io';
 import loading from '../assets/Gear-0.6s-200px.svg';
+import { addSong } from './../app/actions';
 
 interface AddSongProps {
   onClose: () => void;
@@ -121,7 +120,7 @@ const AddSongModal: React.FC<AddSongProps> = ({ onClose }) => {
   const [addLoading, setAddLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const handleAddSong = async () => {
+  const handleAddSong = () => {
     if (!newSong.title || !newSong.artist || !newSong.album || !newSong.genre) {
       setError('All fields are required');
       return;
@@ -130,14 +129,9 @@ const AddSongModal: React.FC<AddSongProps> = ({ onClose }) => {
     try {
       setAddLoading(true);
       setError('');
-      const res = await addSong(newSong);
-      if (res?.success) {
-        dispatch(ADD(res?.song));
-        toast.success('Song added successfully');
-      } else {
-        console.log(res?.message);
-        setError('Failed to add song');
-      }
+      dispatch(addSong(newSong));
+      toast.success('Song added successfully');
+      onClose();
     } catch (error) {
       console.error(error);
       toast.error('Failed to add song');
