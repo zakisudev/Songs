@@ -17,6 +17,21 @@ export const fetchSongs = async () => {
   }
 };
 
+// @desc    Fetch statistics
+// @route   GET /api/stats
+export const fetchStats = async () => {
+  try {
+    const response = await axios.get(`${baseUrl}/stats`);
+    if (response?.data && response?.data?.success) {
+      return response.data;
+    } else {
+      throw new Error('Failed to fetch statistics');
+    }
+  } catch (error) {
+    console.error(error);
+  }
+};
+
 // @desc    Add new song
 // @route   POST /api/songs
 export const addSong = async (newSong: object) => {
@@ -34,9 +49,13 @@ export const addSong = async (newSong: object) => {
 
 // @desc    Update song
 // @route   PUT /api/songs/:id
-export const updateSong = async (id: string, updatedSong: object) => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const updateSong = async (updatedSong: any) => {
   try {
-    const response = await axios.put(`${baseUrl}/songs/${id}`, updatedSong);
+    const response = await axios.put(
+      `${baseUrl}/songs/${updatedSong?.id}`,
+      updatedSong
+    );
     if (response?.data && response?.data?.success) {
       return response?.data;
     } else {
@@ -56,21 +75,6 @@ export const deleteSong = async (id: string) => {
       return response?.data;
     } else {
       throw new Error('Failed to delete song');
-    }
-  } catch (error) {
-    console.error(error);
-  }
-};
-
-// @desc    Fetch statistics
-// @route   GET /api/stats
-export const fetchStats = async () => {
-  try {
-    const response = await axios.get(`${baseUrl}/stats`);
-    if (response?.data && response?.data?.success) {
-      return response.data;
-    } else {
-      throw new Error('Failed to fetch statistics');
     }
   } catch (error) {
     console.error(error);
