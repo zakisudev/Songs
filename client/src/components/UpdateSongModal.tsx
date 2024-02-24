@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { updateSong } from '../services/api';
-import { updateSong as UPDATE } from '../app/song.slice';
 import { toast } from 'react-toastify';
 import styled from '@emotion/styled';
 import { IoMdClose } from 'react-icons/io';
 import loading from '../assets/Gear-0.6s-200px.svg';
+import { updateSong } from '../app/actions';
 interface UpdateSongProps {
   song: {
     _id: string;
@@ -120,10 +119,10 @@ const UpdateSongModal: React.FC<UpdateSongProps> = ({ onClose, song }) => {
   const dispatch = useDispatch();
   const [updatedSong, setUpdatedSong] = useState({
     id: song?._id || '',
-    title: '',
-    artist: '',
-    album: '',
-    genre: '',
+    title: song?.title || '',
+    artist: song?.artist || '',
+    album: song?.album || '',
+    genre: song?.genre || '',
   });
   const [updateLoading, setUpdateLoading] = useState(false);
   const [error, setError] = useState('');
@@ -142,13 +141,9 @@ const UpdateSongModal: React.FC<UpdateSongProps> = ({ onClose, song }) => {
     try {
       setUpdateLoading(true);
       setError('');
-      const res = await updateSong(updatedSong);
-      if (res?.success) {
-        dispatch(UPDATE(res?.song));
-        toast.success('Song updated successfully');
-      } else {
-        setError('Failed to update song');
-      }
+      dispatch(updateSong(updatedSong));
+      toast.success('Song updated successfully');
+      onClose();
     } catch (error) {
       console.error(error);
       toast.error('Failed to update song');
@@ -171,7 +166,7 @@ const UpdateSongModal: React.FC<UpdateSongProps> = ({ onClose, song }) => {
             <InputLabel>Title:</InputLabel>
             <Input
               type="text"
-              value={updatedSong?.title || song.title || ''}
+              value={updatedSong?.title || ''}
               onChange={(e) =>
                 setUpdatedSong({ ...updatedSong, title: e.target.value })
               }
@@ -181,7 +176,7 @@ const UpdateSongModal: React.FC<UpdateSongProps> = ({ onClose, song }) => {
             <InputLabel>Artist:</InputLabel>
             <Input
               type="text"
-              value={updatedSong.artist || song.artist || ''}
+              value={updatedSong.artist || ''}
               onChange={(e) =>
                 setUpdatedSong({ ...updatedSong, artist: e.target.value })
               }
@@ -191,7 +186,7 @@ const UpdateSongModal: React.FC<UpdateSongProps> = ({ onClose, song }) => {
             <InputLabel>Album:</InputLabel>
             <Input
               type="text"
-              value={updatedSong.album || song.album || ''}
+              value={updatedSong.album || ''}
               onChange={(e) =>
                 setUpdatedSong({ ...updatedSong, album: e.target.value })
               }
@@ -201,7 +196,7 @@ const UpdateSongModal: React.FC<UpdateSongProps> = ({ onClose, song }) => {
             <InputLabel>Genre:</InputLabel>
             <Input
               type="text"
-              value={updatedSong.genre || song.genre || ''}
+              value={updatedSong.genre || ''}
               onChange={(e) =>
                 setUpdatedSong({ ...updatedSong, genre: e.target.value })
               }

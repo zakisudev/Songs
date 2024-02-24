@@ -46,7 +46,7 @@ function* handleUpdateSong(action: any): any {
   try {
     const song = yield call(UPDATE, action.payload);
     const stats = yield call(fetchStats);
-    yield put(updateSong(song));
+    yield put(updateSong(song?.song));
     yield put(setStats(stats?.stats));
   } catch (error) {
     console.error(error);
