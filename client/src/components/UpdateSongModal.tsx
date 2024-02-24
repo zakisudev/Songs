@@ -119,6 +119,7 @@ const LoadingAnimation = styled.img`
 const UpdateSongModal: React.FC<UpdateSongProps> = ({ onClose, song }) => {
   const dispatch = useDispatch();
   const [updatedSong, setUpdatedSong] = useState({
+    id: song?._id || '',
     title: '',
     artist: '',
     album: '',
@@ -141,7 +142,7 @@ const UpdateSongModal: React.FC<UpdateSongProps> = ({ onClose, song }) => {
     try {
       setUpdateLoading(true);
       setError('');
-      const res = await updateSong(song?._id, updatedSong);
+      const res = await updateSong(updatedSong);
       if (res?.success) {
         dispatch(UPDATE(res?.song));
         toast.success('Song updated successfully');
