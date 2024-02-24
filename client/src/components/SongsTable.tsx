@@ -3,13 +3,12 @@ import { useDispatch, useSelector } from 'react-redux';
 import Modal from 'react-modal';
 import styled from '@emotion/styled';
 import { TbMusicPlus, TbEdit, TbHttpDelete } from 'react-icons/tb';
-import { fetchSongs, deleteSong } from './../services/api';
-import { setSongs, deleteSong as DELETE } from '../app/song.slice';
 import { RootState } from '../app/root.reducer';
 import AddSongModal from './AddSongModal';
 import UpdateSongModal from './UpdateSongModal';
 import { toast } from 'react-toastify';
 import loading from '../assets/Magnify-1s-200px.svg';
+import { deleteSong, fetchSongs } from '../app/actions';
 
 export interface Song {
   _id: string;
@@ -24,7 +23,7 @@ const SongsTable = () => {
   const [addModal, setAddModal] = useState(false);
   const [updateModal, setUpdateModal] = useState(false);
   const [editingSong, setEditingSong] = useState({});
-  const [deletingSong, setDeletingSong] = useState({} as Song);
+  const [deletingSong, setDeletingSong] = useState('');
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [deleteError, setDeleteError] = useState('');
@@ -38,39 +37,34 @@ const SongsTable = () => {
     setEditingSong(song);
   };
 
-  const handleDeleteModal = (song: Song) => () => {
+  const handleDeleteModal = (id: string) => () => {
     setModalIsOpen(true);
-    setDeletingSong(song);
+    setDeletingSong(id);
   };
 
   const handleSongDelete = async () => {
     setDeleteLoading(true);
     setDeleteError('');
     try {
-      const res = await deleteSong(deletingSong._id);
-      if (res?.success) {
-        dispatch(DELETE(deletingSong._id));
-        toast.success('Song deleted successfully');
-      } else {
-        setDeleteError('Error deleting song, try again');
-      }
+      dispatch(deleteSong(deletingSong));
+      toast.success('Song deleted successfully');
+      setModalIsOpen(false);
     } catch (error) {
-      setDeleteError('Server error, try again later');
+      setDeleteError('Failed to delete song');
     } finally {
       setDeleteLoading(false);
-      setModalIsOpen(false);
     }
   };
 
   useEffect(() => {
     const fetchSongsFromBackend = async () => {
       try {
-        const res = await fetchSongs();
-        dispatch(setSongs(res.songs));
+        dispatch(fetchSongs());
       } catch (error) {
         console.error(error);
       }
     };
+
     fetchSongsFromBackend();
   }, [dispatch]);
 
@@ -119,6 +113,7 @@ const SongsTable = () => {
           song={editingSong as Song}
         />
       )}
+
       <SongHeader>Songs:</SongHeader>
       <ButtonContainer>
         <AddButton onClick={() => setAddModal(true)}>
@@ -126,6 +121,7 @@ const SongsTable = () => {
           Add Song
         </AddButton>
       </ButtonContainer>
+
       <Table>
         <thead>
           <tr>
@@ -147,7 +143,7 @@ const SongsTable = () => {
                 <button onClick={handleSongSelect(song)}>
                   <TbEdit />
                 </button>
-                <button onClick={handleDeleteModal(song)}>
+                <button onClick={handleDeleteModal(song._id)}>
                   <TbHttpDelete />
                 </button>
               </Td>
