@@ -5,6 +5,7 @@ import styled from '@emotion/styled';
 import { IoMdClose } from 'react-icons/io';
 import loading from '../assets/Gear-0.6s-200px.svg';
 import { addSong } from './../app/actions';
+import { checkCharLength } from '../utils/helpers';
 
 interface AddSongProps {
   onClose: () => void;
@@ -121,10 +122,10 @@ const AddSongModal: React.FC<AddSongProps> = ({ onClose }) => {
   const [error, setError] = useState('');
 
   const handleAddSong = () => {
-    if (!newSong.title || !newSong.artist || !newSong.album || !newSong.genre) {
-      setError('All fields are required');
-      return;
-    }
+    checkCharLength(newSong.title, setError, 'Title');
+    checkCharLength(newSong.artist, setError, 'Artist');
+    checkCharLength(newSong.album, setError, 'Album');
+    checkCharLength(newSong.genre, setError, 'Genre');
 
     try {
       setAddLoading(true);

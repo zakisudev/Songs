@@ -1,5 +1,10 @@
 const Song = require('../models/song.model');
 const mongoose = require('mongoose');
+const {
+  checkProperties,
+  checkAddValues,
+  checkUpdateValues,
+} = require('../utils/helpers');
 
 // @desc    Get all songs
 // @route   GET /api/songs
@@ -19,11 +24,9 @@ const getSongs = async (_, res) => {
 const addSong = async (req, res) => {
   try {
     const { title, artist, album, genre } = req.body;
-    if (!title || !artist || !album || !genre) {
-      return res
-        .status(400)
-        .json({ message: 'Please fill in all fields', success: false });
-    }
+
+    checkAddValues(res, req.body);
+    checkProperties(res, req.body);
 
     const newSong = await Song.create({ title, artist, album, genre });
     if (!newSong) {
@@ -43,10 +46,14 @@ const addSong = async (req, res) => {
 // @access  Public
 const updateSong = async (req, res) => {
   const { title, artist, album, genre } = req.body;
-  const songId = req.params.id;
+  const { id: songId } = req.params;
+
   if (!mongoose.Types.ObjectId.isValid(songId)) {
     return res.status(404).json({ message: 'Invalid song id', success: false });
   }
+
+  checkUpdateValues(res, req.body);
+  checkProperties(res, req.body);
 
   try {
     const songToBeUpdated = await Song.findById(songId);
@@ -84,7 +91,8 @@ const updateSong = async (req, res) => {
 // @route   DELETE /api/songs/:id
 // @access  Public
 const deleteSong = async (req, res) => {
-  const songId = req.params.id;
+  const { id: songId } = req.params;
+
   if (!mongoose.Types.ObjectId.isValid(songId)) {
     return res.status(404).json({ message: 'Invalid song id', success: false });
   }
